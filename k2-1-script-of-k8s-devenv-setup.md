@@ -145,14 +145,14 @@ go install github.com/cloudflare/cfssl/cmd/...@latest
 
 ## 下载kubernetes代码：  
 ```sh  
-mkdir $GOPATH/src/k8s.io  
+mkdir $GOPATH/src/k8s.io  && cd $GOPATH/src/k8s.io
 git clone https://github.com/kubernetes/kubernetes.git  
 git checkout -b kube1.24 v1.24.0  
 ```  
 
 ## 编译启动本地单节点集群：  
 ```sh  
-cd $GOPATH/src/k8s/kubernetes
+cd $GOPATH/src/k8s.io/kubernetes
 编译单个组建：sudo make WHAT="cmd/kube-apiserver"  
 编译所有组件：sudo make all  
 启动本地单节点集群： sudo ./hack/local-up-cluster.sh  
