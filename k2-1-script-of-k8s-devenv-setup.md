@@ -6,7 +6,7 @@
 ```sh
 sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak  
 sudo nano /etc/apt/sources.list  
-```  
+```
 用如下阿里源替换该文件的已有内容： 
 ```sh   
 deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse  
@@ -21,12 +21,12 @@ deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe m
 deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse  
 
 sudo apt-get update  
-```  
+```
 
 ## 安装GNU  
 ```sh  
 sudo apt install build-essential  
-```  
+```
 
 ## 安装Docker
 ```sh  
@@ -45,12 +45,12 @@ echo \
 
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-```  
+```
 
 ## 修改ContainerD 所用的镜像库地址  
 ```sh  
 containerd config default > ~/config.toml  
-```  
+```
 然后编辑～config.toml去添加信息，具体内容请看视频中这个环节
 ```sh  
 sudo mv ~/config.toml /etc/containerd/config.toml  
@@ -63,7 +63,7 @@ cd ~/Downloads
 wget https://github.com/WayneD/rsync/archive/refs/tags/v3.2.4.tar.gz  
 tar -xf v3.2.4.tar.gz  
 cd rsync-3.2.4  
-```  
+```
 安装一些工具包  
 ```sh  
 sudo apt install -y gcc g++ gawk autoconf automake python3-cmarkgfm  
@@ -73,19 +73,19 @@ sudo apt install -y libxxhash-dev
 sudo apt install -y libzstd-dev  
 sudo apt install -y liblz4-dev  
 sudo apt install -y libssl-dev  
-```  
+```
 编译，安装  
 ```sh  
 ./configure  
 make  
 sudo cp ./rsync /usr/local/bin/  
 sudo cp ./rsync-ssl /usr/local/bin/  
-```  
+```
 
 ## 安装jq：  
 ```sh  
 sudo apt-get install jq  
-```  
+```
 
 ## 安装pyyaml:  
 sudo apt install python3-pip  
@@ -116,7 +116,7 @@ mkdir ~/go
 mkdir ~/go/src  
 mkdir ~/go/bin  
 sudo nano ~/.bashrc  
-```  
+```
 最后加入如下几行：  
 ```sh  
 export GOPATH="/home/<用户名>/go"  
@@ -126,7 +126,7 @@ export PATH="/usr/local/go/bin:$GOPATH/bin:${PATH}"
 source ~/.bashrc  
 
 sudo nano /etc/sudoers  
-```  
+```
 在secure_path一行加入如下目录：  
 /usr/local/go/bin （这个是$GOPATH/bin目录）  
 /home/<用户名>/etcd （这个是etcd命令所在目录）  
@@ -141,14 +141,14 @@ go env -w GOPROXY="https://goproxy.cn,direct"
 ## 安装CFSSL：  
 ```sh  
 go install github.com/cloudflare/cfssl/cmd/...@latest  
-```  
+```
 
 ## 下载kubernetes代码：  
 ```sh  
 mkdir $GOPATH/src/k8s.io  && cd $GOPATH/src/k8s.io
 git clone https://github.com/kubernetes/kubernetes.git  
 git checkout -b kube1.24 v1.24.0  
-```  
+```
 
 ## 编译启动本地单节点集群：  
 ```sh  
@@ -157,3 +157,45 @@ cd $GOPATH/src/k8s.io/kubernetes
 编译所有组件：sudo make all  
 启动本地单节点集群： sudo ./hack/local-up-cluster.sh  
 ```
+
+## 开启本地debug功能
+
+```sh
+cd $GOPATH/src/k8s.io/kubernetes
+# kubernetes go编译文件
+sudo vi ./hack/lib/golang.sh
+# 查找build_binaries()函数 vi语法
+:/build_binaries()
+```
+
+### 找到一下bebug判断，注释，一直开启debug能力
+
+> ```sh
+> 	gogcflags="all=-trimpath=${trimroot} ${GOGCFLAGS:-}"
+>     if [[ "${DBG:-}" == 1 ]]; then
+>         # Debugging - disable optimizations and inlining.
+>         gogcflags="${gogcflags} -N -l"
+>     fi
+> 
+>     goldflags="all=$(kube::version::ldflags) ${GOLDFLAGS:-}"
+>     if [[ "${DBG:-}" != 1 ]]; then
+>         # Not debugging - disable symbols and DWARF.
+>         goldflags="${goldflags} -s -w"
+>     fi
+> ```
+>
+> 注释判断，将debug直接放在下面， 再保存即可
+>
+> ```sh
+> 	gogcflags="all=-trimpath=${trimroot} ${GOGCFLAGS:-}"
+>     # if [[ "${DBG:-}" == 1 ]]; then
+>     #     # Debugging - disable optimizations and inlining.
+>     #     gogcflags="${gogcflags} -N -l"
+>     # fi
+> 	gogcflags="${gogcflags} -N -l"
+>     goldflags="all=$(kube::version::ldflags) ${GOLDFLAGS:-}"
+>     # if [[ "${DBG:-}" != 1 ]]; then
+>     #     # Not debugging - disable symbols and DWARF.
+>     #     goldflags="${goldflags} -s -w"
+>     # fi
+> ```
